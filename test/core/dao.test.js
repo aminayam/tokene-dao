@@ -66,7 +66,7 @@ describe("DAO", () => {
       assert.equal(tx.logs[0].args.voter, USER1);
       assert.equal(tx.logs[0].args.proposalID, 0);
 
-      assert.equal(await dao.getVotesList(0), USER1);
+      assert.equal((await dao.getVotesList(0, 0, 100))[0], USER1);
       assert.equal(await dao.getVotesListExist(0, USER1), true);
     });
     it("revert if user already voted", async () => {

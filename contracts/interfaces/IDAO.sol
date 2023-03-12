@@ -18,7 +18,11 @@ interface IDAO {
 
     function executeProposal(uint256 proposalID) external;
 
-    function getVotesList(uint256 proposalID) external view returns (address[] memory);
+    function getVotesList(
+        uint256 proposalID,
+        uint256 cursor,
+        uint256 limit
+    ) external view returns (address[] memory, uint256 newCursor);
 
     function getVotesListExist(uint256 proposalID, address user) external view returns (bool);
 }

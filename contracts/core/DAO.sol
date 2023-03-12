@@ -80,11 +80,27 @@ contract DAO is IDAO {
         proposal_.proposalExecuted = true;
     }
 
-    function getVotesList(uint256 proposalID) public view returns (address[] memory) {
-        return proposals[proposalID].votedUsers;
+    function getVotesList(
+        uint256 proposalID,
+        uint256 cursor,
+        uint256 limit
+    ) external view returns (address[] memory, uint256 newCursor) {
+        address[] storage votedUsers_ = proposals[proposalID].votedUsers;
+
+        uint256 length = limit;
+        if (length > votedUsers_.length - cursor) {
+            length = votedUsers_.length - cursor;
+        }
+
+        address[] memory values = new address[](length);
+        for (uint256 i = 0; i < length; i++) {
+            values[i] = votedUsers_[cursor + i];
+        }
+
+        return (values, cursor + length);
     }
 
-    function getVotesListExist(uint256 proposalID, address user) public view returns (bool) {
+    function getVotesListExist(uint256 proposalID, address user) external view returns (bool) {
         return proposals[proposalID].votedUsersExist[user];
     }
 

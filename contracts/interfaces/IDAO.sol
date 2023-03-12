@@ -10,7 +10,8 @@ interface IDAO {
         address _contractAddress,
         bytes memory _data,
         uint64 _voteLivingTime,
-        string memory description
+        string memory description,
+        uint256 votesLimit
     ) external;
 
     function vote(uint256 proposalID) external;

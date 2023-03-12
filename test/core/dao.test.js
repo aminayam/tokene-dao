@@ -31,7 +31,7 @@ describe("DAO", () => {
     USER2 = await accounts(1);
 
     token = await ERC20Mock.new("Mock", "Mock", 18);
-    dao = await DAO.new(token.address, 20);
+    dao = await DAO.new(token.address);
     masterAccess = await MasterAccessManagement.new();
     await masterAccess.__MasterAccessManagement_init(dao.address);
 
@@ -43,7 +43,7 @@ describe("DAO", () => {
 
   describe("createProposal", () => {
     it("proposal creation", async () => {
-      let tx = await dao.createProposal(masterAccess.address, bytesData, expiration_, description_);
+      let tx = await dao.createProposal(masterAccess.address, bytesData, expiration_, description_, 20);
       const res_ = await dao.proposals(0);
 
       assert.equal(res_.data, bytesData);
@@ -73,7 +73,7 @@ describe("DAO", () => {
       await truffleAssert.reverts(dao.vote(0), "Already voted");
     });
     it("revert if proposal already ended", async () => {
-      await dao.createProposal(masterAccess.address, "0x00", crackedExpiration_, description2_);
+      await dao.createProposal(masterAccess.address, "0x00", crackedExpiration_, description2_, 20);
       await truffleAssert.reverts(dao.vote(1), "Proposal already ended");
     });
   });

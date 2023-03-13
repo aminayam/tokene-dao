@@ -3,10 +3,18 @@ pragma solidity 0.8.17;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@tokene/core-contracts/interfaces/core/IMasterAccessManagement.sol";
+import "@dlsl/dev-modules/access-control/RBAC.sol";
 
 import "../interfaces/IDAO.sol";
 
-contract DAO is IDAO {
+contract DAO is IDAO, RBAC {
+    IMasterAccessManagement internal masterAccess;
+
+    string public constant DAO_RESOURCE = "DAO_RESOURCE";
+    string public constant CREATE_PROPOSAL_PERMISSION = "CREATE_PROPOSAL";
+    string public constant VOTE_PERMISSION = "VOTE";
+
     struct Proposal {
         address contractAddress;
         bytes data;
@@ -25,8 +33,24 @@ contract DAO is IDAO {
 
     IERC20 public tokenContract;
 
-    constructor(IERC20 token) {
+    constructor(IERC20 token, IMasterAccessManagement _masterAccess) {
         tokenContract = token;
+        masterAccess = _masterAccess;
+    }
+
+    modifier hasDAOPermission(string memory permission_) {
+        require(
+            masterAccess.hasPermission(msg.sender, DAO_RESOURCE, permission_),
+            string(
+                abi.encodePacked(
+                    "RBAC: no ",
+                    permission_,
+                    " permission for resource ",
+                    DAO_RESOURCE
+                )
+            )
+        );
+        _;
     }
 
     function createProposal(
@@ -35,7 +59,7 @@ contract DAO is IDAO {
         uint64 voteLivingTime_,
         string memory description,
         uint256 votesLimit_
-    ) external {
+    ) external hasDAOPermission(CREATE_PROPOSAL_PERMISSION) {
         Proposal storage proposal_ = proposals.push();
         proposal_.contractAddress = contractAddress_;
         proposal_.data = _data;
@@ -50,7 +74,7 @@ contract DAO is IDAO {
         proposalCount++;
     }
 
-    function vote(uint256 proposalID) external {
+    function vote(uint256 proposalID) external hasDAOPermission(VOTE_PERMISSION) {
         Proposal storage proposal_ = proposals[proposalID];
         require(
             !proposal_.proposalExecuted && (proposal_.expiration > block.timestamp),
@@ -110,7 +134,7 @@ contract DAO is IDAO {
     ) internal view returns (bool) {
         uint votesCount_;
         for (uint i = 0; i < votedUsers_.length; i++) {
-            votesCount_ += tokenContract.balanceOf(msg.sender);
+            votesCount_ += tokenContract.balanceOf(votedUsers_[i]);
         }
         if (votesCount_ >= votesLimit_) {
             return true;

@@ -4,11 +4,10 @@ pragma solidity 0.8.17;
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@tokene/core-contracts/interfaces/core/IMasterAccessManagement.sol";
-import "@dlsl/dev-modules/access-control/RBAC.sol";
 
 import "../interfaces/IDAO.sol";
 
-contract DAO is IDAO, RBAC {
+contract DAO is IDAO {
     IMasterAccessManagement internal masterAccess;
 
     string public constant DAO_RESOURCE = "DAO_RESOURCE";
